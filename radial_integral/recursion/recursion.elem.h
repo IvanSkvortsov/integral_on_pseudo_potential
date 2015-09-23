@@ -3,7 +3,8 @@
 #include<cmath>// sqrt
 #include"spec_func/erfh.h"// erfh : erfh_d erfh_ld erfh_mp
 #include"spec_func/dawson.h"// dawson : dawson_d dawson_ld dawson_mp
-#include"../../../lib_math/math.constants.h"// Pi, sqrt( Pi ), 2 * sqrt( Pi ) : Pi, sqrtPi, _2_sqrtPi
+//#include"../../../lib_math/math.constants.h"// Pi, sqrt( Pi ), 2 * sqrt( Pi ) : Pi, sqrtPi, _2_sqrtPi
+#include"../../lib_math/math.constants.h"// Pi, sqrt( Pi ), 2 * sqrt( Pi ) : Pi, sqrtPi, _2_sqrtPi
 #if defined __MPREAL_H__
 #include"spec_func/dawson_mp.cpp"
 #include"spec_func/erfh_mp.cpp"

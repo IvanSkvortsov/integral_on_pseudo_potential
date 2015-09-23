@@ -1,6 +1,6 @@
 #ifndef __POLYNOMIAL_H__
 #define __POLYNOMIAL_H__
-#include"../scp.array.h"
+#include"scp.array.h"
 
 #ifndef __zero_float
 #define __zero_float 1.0e-10

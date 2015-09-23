@@ -1,8 +1,10 @@
 #ifndef __LEGENDRE_H__
 #define __LEGENDRE_H__
 #include"polynomial.h"
-#include"../../lib_math/math.functions.h"// NewtonC, par_fact
-#include"../../lib_math/math.constants.h"// Pi, sqrtPi, etc.
+//#include"../../lib_math/math.functions.h"// NewtonC, par_fact
+//#include"../../lib_math/math.constants.h"// Pi, sqrtPi, etc.
+#include"../lib_math/math.functions.h"// NewtonC, par_fact
+#include"../lib_math/math.constants.h"// Pi, sqrtPi, etc.
 
 template<class T>
 struct polynom_4

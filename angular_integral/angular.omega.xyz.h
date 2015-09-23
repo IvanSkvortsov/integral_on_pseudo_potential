@@ -2,7 +2,8 @@
 #define __ANGULAR_OMEGA_XYZ_H__
 #include<cstddef>// size_t
 #include<cstdlib>// exit
-#include"../../lib_math/math.functions.h"// factt
+//#include"../../lib_math/math.functions.h"// factt
+#include"../lib_math/math.functions.h"// factt
 #include<vector>
 
 #ifndef _100x1024x1024_// 100 Mb
