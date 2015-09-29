@@ -27,19 +27,13 @@ template<class T>
 void ecp_demo(char const * file)
 {
 	Primitive<T> a, b;
-	ecp_primitive<T> ecp;
-	read_task<T>( a, b, ecp, file );
+	vector<ecp_primitive<T> > v_ecp;
+	read_task<T>( a, b, v_ecp, file );
 	cout << "task read from file \"" << file << "\"" << endl;
 	T value = T(0);
-	value = ecp_integral<T>( a, b, ecp );
 	cout.setf( ios::scientific );
-	int prec = 12, w = prec + 8;
+	int prec = 16, w = prec + 8;
 	cout.precision( prec );
-	cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value << endl << endl;
-	//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (4 * T(Pi)) << endl << endl;
-	//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (16 * T(Pi) * T(Pi)) << endl << endl;
-	//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (64 * T(Pi) * T(Pi) * T(Pi)) << endl << endl;
-	//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (256 * T(Pi) * T(Pi) * T(Pi) * T(Pi)) << endl << endl;
 	cout << setw(4) << "i" << setw(4) << "j" << setw(4) << "k" << 
 		setw(w) << "x" << setw(w) << "y" << setw(w) << "z" << setw(w) << "alpha" << endl;
 	print_basis_prim<T>( cout, a, prec );
@@ -47,10 +41,25 @@ void ecp_demo(char const * file)
 	cout << endl;
 	cout << setw(4) << "l" << setw(4) << "n" << setw(4) << "" << 
 		setw(w) << "x" << setw(w) << "y" << setw(w) << "z" << setw(w) << "alpha" << endl;
-	print_ecp_prim<T>( cout, ecp, prec );
+	print_ecp_prim<T>( cout, v_ecp[0], prec );
+	//
+	for(int i = 0; i < v_ecp.size(); ++i)
+	{
+		value = ecp_semi_local_integral<T>( a, b, v_ecp[i] );
+		cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value << setw(4) << v_ecp[i].l << endl;// << endl;
+		//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (4 * T(Pi)) << endl << endl;
+		//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (16 * T(Pi) * T(Pi)) << endl << endl;
+		//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (64 * T(Pi) * T(Pi) * T(Pi)) << endl << endl;
+		//cout << setw(14) << "ecp_integral" << " : " << setw( w ) << value / (256 * T(Pi) * T(Pi) * T(Pi) * T(Pi)) << endl << endl;
+		//print_ecp_prim<T>( cout, v_ecp[i], prec );
+	}
 }
+
+//using mpfr::mpreal;
 
 void ecp_demo_d(char const * file )
 {
+	//mpfr::mpreal::set_default_prec( mpfr::digits2bits(30) );
+	//ecp_demo<mpreal>( file );
 	ecp_demo<double>( file );
 }

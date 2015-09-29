@@ -11,7 +11,7 @@ namespace qu_integral
 template<class T>
 T Qu(int const & N, int const & lmb_a, int const & lmb_b, T const & ka, T const & kb, T const * tau, T const * sigma, T const * _sigma, T const * rho);
 template<class T>
-T Qu(int const & N, int const & lmb, T const & k, T const * kappa, T const * etta);
+T Qu(int const & N, int const & lmb, T const & k, T const * kappa, T const * eta);
 //----- resize ------//
 // semi local
 template<class T>
@@ -28,7 +28,7 @@ template<class T>
 void Qu_run(std::vector<T> & v, int const & N_size, int const & lmb_a_size, int const & lmb_b_size, int const& n, T const & ka, T const & kb,
 	T const * tau, T const * sigma, T const * _sigma, T const * rho);
 template<class T>
-void Qu_run(std::vector<T> & v, int const & N_size, int const & lmb_size, int const& n, T const & k, T const * kappa, T const * etta);
+void Qu_run(std::vector<T> & v, int const & N_size, int const & lmb_size, int const& n, T const & k, T const * kappa, T const * eta);
 };
 
 //---------------------- resize -----------------------//
@@ -90,7 +90,7 @@ void qu_integral::Qu_run(std::vector<T> & v, int const & N_size, int const & lmb
 }
 template<class T>
 void qu_integral::Qu_run(std::vector<T> & v, int const & N_size, int const & lmb_size, int const& n, T const & k,
-		T const * kappa, T const * etta)
+		T const * kappa, T const * eta)
 {
 	T * p = v.data();
 	int N = n;
@@ -98,7 +98,7 @@ void qu_integral::Qu_run(std::vector<T> & v, int const & N_size, int const & lmb
 	{
 		for(int lmb = 0; lmb < lmb_size; ++lmb)
 		{
-			*p++ = qu_integral::Qu<T>(N, lmb, k, kappa, etta);
+			*p++ = qu_integral::Qu<T>(N, lmb, k, kappa, eta);
 		}
 		++N;
 	}
@@ -140,7 +140,7 @@ T qu_integral::Qu(int const & N, int const & lmb_a, int const & lmb_b, T const &
 }
 
 template<class T> 
-T qu_integral::Qu(int const & N, int const & lmb, T const & k, T const * kappa, T const * etta)
+T qu_integral::Qu(int const & N, int const & lmb, T const & k, T const * kappa, T const * eta)
 {
 	int N_i, lp = lmb + 1;
 	T pow_k_ = T(1);
@@ -152,7 +152,7 @@ T qu_integral::Qu(int const & N, int const & lmb, T const & k, T const * kappa, 
 		pow_k_ *= k;
 		a = hankel::alpha<T>(i, lmb);
 		b = hankel::beta <T>(i, lmb);
-		val += (a * kappa[N_i] - b * etta[N_i]) / pow_k_;
+		val += (a * kappa[N_i] - b * eta[N_i]) / pow_k_;
 	}
 	return val * (lp%2 ? -1 : 1);
 }

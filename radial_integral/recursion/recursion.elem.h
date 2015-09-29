@@ -5,11 +5,12 @@
 #include"spec_func/dawson.h"// dawson : dawson_d dawson_ld dawson_mp
 //#include"../../../lib_math/math.constants.h"// Pi, sqrt( Pi ), 2 * sqrt( Pi ) : Pi, sqrtPi, _2_sqrtPi
 #include"../../lib_math/math.constants.h"// Pi, sqrt( Pi ), 2 * sqrt( Pi ) : Pi, sqrtPi, _2_sqrtPi
+/*
 #if defined __MPREAL_H__
 #include"spec_func/dawson_mp.cpp"
 #include"spec_func/erfh_mp.cpp"
 #endif//__MPREAL_H__
-
+*/
 #define __recursion_elem_print__
 #ifdef  __recursion_elem_print__
 #include<iostream>
@@ -21,6 +22,9 @@
 // It contains elements that are used in Radial Integral reccursivly realizied calculation
 
 using std::sqrt;
+using std::exp;
+//using std::erf;
+
 template<class T>
 struct recursion_elem
 {
@@ -130,7 +134,7 @@ struct recursion_elem
 	void run_ka_x_kb(T const & _ka, T const & _kb);
 	void set_zero();
 #ifdef  __recursion_elem_print__
-	void print(std::ostream & out)const;
+	void print(std::ostream & out = std::cout)const;
 #endif
 };
 
@@ -218,28 +222,28 @@ void recursion_elem<T>::set_zero()
 template<class T>
 void recursion_elem<T>::print(std::ostream & out)const
 {
-	int p = 30, w = p + 10;
+	int p = 30, w = p + 10, wf = 30;
 	out.setf(std::ios::scientific);
-	out << std::setw(10) << "alp" << std::setw( w ) << std::setprecision( p ) << alp << std::endl;
-	out << std::setw(10) << "alp2" << std::setw( w ) << std::setprecision( p ) << alp2 << std::endl;
-	out << std::setw(10) << "alp4" << std::setw( w ) << std::setprecision( p ) << alp4 << std::endl;
-	out << std::setw(10) << "sqrt_alp" << std::setw( w ) << std::setprecision( p ) << sqrt_alp << std::endl;
-	out << std::setw(10) << "ap_sqrtalp" << std::setw( w ) << std::setprecision( p ) << ap_sqrtalp << std::endl;
-	out << std::setw(10) << "am_sqrtalp" << std::setw( w ) << std::setprecision( p ) << am_sqrtalp << std::endl;
-	out << std::setw(10) << "ap" << std::setw( w ) << std::setprecision( p ) << ap << std::endl;
-	out << std::setw(10) << "am" << std::setw( w ) << std::setprecision( p ) << am << std::endl;
-	out << std::setw(10) << "sqrt_pialp" << std::setw( w ) << std::setprecision( p ) << sqrt_pialp << std::endl;
-	out << std::setw(10) << "erf_ap" << std::setw( w ) << std::setprecision( p ) << erf_ap << std::endl;
-	out << std::setw(10) << "erf_am" << std::setw( w ) << std::setprecision( p ) << erf_am << std::endl;
-	out << std::setw(10) << "erfh_ap" << std::setw( w ) << std::setprecision( p ) << erfh_ap << std::endl;
-	out << std::setw(10) << "erfh_am" << std::setw( w ) << std::setprecision( p ) << erfh_am << std::endl;
-	out << std::setw(10) << "daw_ap" << std::setw( w ) << std::setprecision( p ) << daw_ap << std::endl;
-	out << std::setw(10) << "daw_am" << std::setw( w ) << std::setprecision( p ) << daw_am << std::endl;
-	out << std::setw(10) << "exp_ap" << std::setw( w ) << std::setprecision( p ) << exp_ap << std::endl;
-	out << std::setw(10) << "exp_am" << std::setw( w ) << std::setprecision( p ) << exp_am << std::endl;
-	out << std::setw(10) << "ka+kb" << std::setw( w ) << std::setprecision( p ) << ka_p_kb << std::endl;
-	out << std::setw(10) << "|ka-kb|" << std::setw( w ) << std::setprecision( p ) << abs__ka_m_kb << std::endl;
-	out << std::setw(10) << "sgn(ka-kb)" << std::setw( w ) << std::setprecision( p ) << sgn__ka_m_kb << std::endl;
+	out << std::setw(10) << "alp" << std::setw( w ) << std::setprecision( p ) << alp << std::setw(wf) << "alp_i + alp_j + alp_k" << std::endl;
+	out << std::setw(10) << "alp2" << std::setw( w ) << std::setprecision( p ) << alp2 << std::setw(wf) << "2 * alp" << std::endl;
+	out << std::setw(10) << "alp4" << std::setw( w ) << std::setprecision( p ) << alp4 << std::setw(wf) << "4 * alp" << std::endl;
+	out << std::setw(10) << "sqrt_alp" << std::setw( w ) << std::setprecision( p ) << sqrt_alp << std::setw(wf) << "sqrt( alp )" << std::endl;
+	out << std::setw(10) << "ap_sqrtalp" << std::setw(w) << std::setprecision(p) << ap_sqrtalp << std::setw(wf) << "ap * sqrt( alp )" << std::endl;
+	out << std::setw(10) << "am_sqrtalp" << std::setw(w) << std::setprecision(p) << am_sqrtalp << std::setw(wf) << "am * sqrt( alp )" << std::endl;
+	out << std::setw(10) << "ap" << std::setw( w ) << std::setprecision( p ) << ap << std::setw(wf) << "(ka + kb) / (2 * alp)" << std::endl;
+	out << std::setw(10) << "am" << std::setw( w ) << std::setprecision( p ) << am << std::setw(wf) << "|ka - kb| / (2 * alp)" << std::endl;
+	out << std::setw(10) << "sqrt_pialp" << std::setw(w) << std::setprecision(p) << sqrt_pialp << std::setw(wf) << "sqrt( Pi /alp )" << std::endl;
+	out << std::setw(10) << "erf_ap" << std::setw(w) << std::setprecision(p) << erf_ap << std::setw(wf) <<  "erf( ap * sqrt( alp ) )" << std::endl;
+	out << std::setw(10) << "erf_am" << std::setw(w) << std::setprecision(p) << erf_am << std::setw(wf) <<  "erf( am * sqrt( alp ) )" << std::endl;
+	out << std::setw(10) << "erfh_ap"<< std::setw(w) << std::setprecision(p) << erfh_ap<< std::setw(wf) << "erfh( ap * sqrt( alp ) )" << std::endl;
+	out << std::setw(10) << "erfh_am"<< std::setw(w) << std::setprecision(p) << erfh_am<< std::setw(wf) << "erfh( am * sqrt( alp ) )" << std::endl;
+	out << std::setw(10) << "daw_ap" << std::setw(w) << std::setprecision(p) << daw_ap << std::setw(wf) << "dawson( ap * sqrt( alp ) )"<<std::endl;
+	out << std::setw(10) << "daw_am" << std::setw(w) << std::setprecision(p) << daw_am << std::setw(wf) << "dawson( am * sqrt( alp ) )"<<std::endl;
+	out << std::setw(10) << "exp_ap" << std::setw( w ) << std::setprecision( p ) << exp_ap << std::setw(wf) << "exp( -alp * ap^2 )" << std::endl;
+	out << std::setw(10) << "exp_am" << std::setw( w ) << std::setprecision( p ) << exp_am << std::setw(wf) << "exp( -alp * am^2 )" << std::endl;
+	out << std::setw(10) << "ka+kb" << std::setw( w ) << std::setprecision( p ) << ka_p_kb << std::setw(wf) << "(ka + kb)" << std::endl;
+	out << std::setw(10) << "|ka-kb|" << std::setw( w ) << std::setprecision( p ) << abs__ka_m_kb << std::setw(wf) << "|ka - kb|" << std::endl;
+	out << std::setw(10) << "sgn(ka-kb)" << std::setw( w ) << std::setprecision( p ) << sgn__ka_m_kb << std::setw(wf)<<"sign(ka - kb)"<<std::endl;
 	out.unsetf( std::ios::scientific );
 	//print<T>(out, *this);
 	return;

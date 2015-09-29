@@ -38,7 +38,8 @@
 // recursion_bc<T> - structure that contains 2 variables of type plus_minus<T> : b, c;
 // plus_minus<T> - structure that also contains 2 variables but type of T: p, m;
 
-#define __recursion_log__
+//#define __recursion_log__
+//#define __recursion_warn_msg__
 #define __recursion_err_msg__
 #define __recursion_print__
 
@@ -293,9 +294,9 @@ int recursion<T>::resize(int __begin, int __end )
 			sz = 1 + _end - _begin;
 	v_bc.resize( sz );
 	sh_bc = &v_bc[0] - (_begin > 0 ? 0 : _begin );
+	int __w = 16;
 #ifdef  __recursion_log__
 	std::cout << "------- recursion<T>::resize(int, int) ------" << std::endl;
-	int __w = 16;
 	std::cout << std::setw( __w ) << "size : " << v_bc.size() << std::endl;
 	std::cout << std::setw( __w ) << "begin : " << _begin << std::endl;
 	std::cout << std::setw( __w ) << "end : " << _end << std::endl;
@@ -310,7 +311,7 @@ int recursion<T>::resize(int __begin, int __end )
 	//
 	if( _end - _begin != v_bc.size() - 1 )
 	{
-#ifdef  __recursion_err_msg__
+#ifdef  __recursion_warn_msg__
 		std::cerr << "Warning: recursion<T>::resize(int, int)" << std::endl;
 		std::cerr << std::setw(__w) << "end - begin : " << _end-_begin << std::endl;
 		std::cerr << std::setw(__w) << "size - 1 : " << v_bc.size()-1 << std::endl;
@@ -360,8 +361,8 @@ void recursion<T>::run_0_eq_3( recursion_elem<T> const & elc )
 {
 	recursion_bc<T> * ptr = &sh_bc[0];
 	plus_minus<T> * b = &(ptr -> b), *c = &(ptr -> c);
-	//_g.m = elc.exp_am / T(4);
-	_g.p = elc.exp_ap / T(4);
+	//_g.m = T(1)/(elc.exp_am * T(4));
+	_g.p = T(1)/(elc.exp_ap * T(4));
 
 	b = &(ptr -> b);
 	c = &(ptr -> c);
@@ -528,8 +529,8 @@ void recursion<T>::run_0_eq( recursion_elem<T> const & elc )
 {
 	recursion_bc<T> * ptr = &sh_bc[0];
 	plus_minus<T> * b = &(ptr -> b), *c = &(ptr -> c);
-	_g.m = elc.exp_am / T(4);
-	_g.p = elc.exp_ap / T(4);
+	_g.m = T(1) / (elc.exp_am * T(4));
+	_g.p = T(1) / (elc.exp_ap * T(4));
 
 	b = &(ptr -> b);
 	c = &(ptr -> c);

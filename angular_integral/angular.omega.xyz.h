@@ -34,14 +34,14 @@
 
 
 // info
-#define __INFO_angular_omega_xyz__
+//#define __INFO_angular_omega_xyz__
 #ifdef  __INFO_angular_omega_xyz__
 #include<iostream>
 #include<iomanip>
 #endif
 
 // login
-#define __LOG_angular_omega_xyz__
+//#define __LOG_angular_omega_xyz__
 #ifdef  __LOG_angular_omega_xyz__
 #include<iostream>
 #endif
@@ -51,7 +51,7 @@
 // calculate integrals like this
 // T angular_omega_xyz<T>::operator()(i, j, k) := integral(i, j, k)
 // this integral is int( x^i * y^j * z^k, theta=0..Pi, phi=0..2*Pi) := 4*Pi*(i-1)!!*(j-1)!!*(k-1)!!/(i+j+k+1)!!
-// P.S. warning, one should multiply the result of operator(int , int, int ) to (4*Pi) in order to get mentioned integral value
+// P.S. warning, one should multiply the result of operator(int , int, int ) by (4*Pi) in order to get mentioned integral value
 
 template<class T>
 struct angular_omega_xyz

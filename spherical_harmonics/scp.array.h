@@ -36,6 +36,8 @@ struct scp_array
 			_data[i] = v[i];
 		return *this;
 	}
+	T * data(){return _data;}
+	T const * data()const{return _data;}
 	T & operator[](int i){return _data[i];}
 	T const & operator[](int i)const{return _data[i];}
 	int const & size()const{return _size;}

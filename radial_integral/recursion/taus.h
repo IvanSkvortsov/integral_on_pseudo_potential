@@ -26,6 +26,10 @@ void taus_run_1(std::vector<T> & v, int & begin, int & end, T * & tau, T * & rho
 		ptr = recurs.p_bc(i);
 		b = &(ptr->b);
 		c = &(ptr->c);
+		//tau[i] = b->p + b->m;
+		//rho[i] = b->p - b->m;
+		// sigma[i] = c->p + sign__ka_m_kb * c->m;
+		//_sigma[i] = c->p - sign__ka_m_kb * c->m;
 		tau[i] = gp * b->p + gm * b->m;
 		rho[i] = gp * b->p - gm * b->m;
 		 sigma[i] = gp * c->p + sign__ka_m_kb * gm * c->m;

@@ -305,7 +305,7 @@ int check_xyz(int const * x)
 // 3.3 equivalent to 2.1 method
 // omega_int<T>( pol_a, pol_b, sph_ra, sph_rb, vsph_a, vsph_b, vsph_pp )
 //
-// omega_int<T>( pol_a, sph_ra, vsph_a, vsph_pp[i] ) * omega_int<T>( pol_b, sph_rb, vsph_b, vsph_pp[i]);
+// sum_(i=-l)^l omega_int<T>( pol_a, sph_ra, vsph_a, vsph_pp[i] ) * omega_int<T>( pol_b, sph_rb, vsph_b, vsph_pp[i]);
 //
 // Let
 // Omega_int_2 := (a,b,c, lmb, r[3], l,m ) ->
@@ -365,9 +365,26 @@ T omega_int(    typename spherical<T>::polynomial_type const & pol_a, typename s
 		std::cerr << "pol_b : " << pol_b.x << ' ' << pol_b.y << ' ' << pol_b.z << std::endl;
 		exit(1);
 	}
-	typename spherical<T>::polynomial_type pol = pol_a;
-	pol += pol_b;
-	return omega_int<T>( pol, sph_r, vsph, omega_xyz_, sph_buf );
+	typename spherical<T>::polynomial_type pol;
+	pol = pol_a * pol_b;
+	T v = 0;
+	typename spherical<T>::polynomial_type const * p;
+	for(int i = 0; i < vsph.size(); ++i)
+	{
+		sph_buf = vsph[i];
+		sph_buf *= pol;
+		T sbuf = 0;
+		p = &sph_buf[0];
+		for(int j = 0; j < sph_buf.size(); ++j)
+		{
+			if( !p->is_even_x() ) continue;
+			sbuf += p->d * omega_xyz_(p->x, p->y, p->z);
+			++p;
+		}
+		v += sph_r[i] * sbuf;
+	}
+	return v;
+	//return omega_int<T>( pol, sph_r, vsph, omega_xyz_, sph_buf );
 }
 
 // 3.5
@@ -501,6 +518,7 @@ int run_n_abc(std::vector<T> & v, int n, int ax, int ay, int az)
 		{
 			if( nmi-j > az ) continue;
 			else v.push_back( T(i, j, nmi-j) );
+			//v.push_back( T(i, j, nmi-j) );
 		}
 	}
 }
@@ -511,6 +529,10 @@ struct v2_xyz
 	int l, x, y, z;
 	std::vector<std::vector<_abc_> > _v2_xyz;
 	v2_xyz():l(0), x(0), y(0), z(0){}
+	void run(int * __x)
+	{
+		this->run( __x[0], __x[1], __x[2] );
+	}
 	void run(int __x, int __y, int __z)
 	{
 		int __l = __x + __y + __z;
@@ -815,7 +837,7 @@ void omega_integral::omega_resize_1(std::vector<T> & v, int & la_size, int & lb_
 	v.resize( la_size * lb_size * lmb_a_size * lmb_b_size );
 }
 template<class T>
-void omega_resize_1(std::vector<T> & v, int & la_size, int & lb_size, int & lmb_size, int const & la, int const& lb)
+void omega_integral::omega_resize_1(std::vector<T> & v, int & la_size, int & lb_size, int & lmb_size, int const & la, int const& lb)
 {
 	la_size = la + 1;
 	lb_size = lb + 1;
@@ -869,7 +891,7 @@ void omega_integral::omega_run_1(std::vector<T> & v, int const & la_size, int co
 	std::vector<spherical<T> > * p_vsph = 0;
 	spherical<T> sph_buf;
 	sph_buf.reserve( 100 );
-	std::cout << "lmb_max : " << l + mmax(la.sum(), lb.sum()) << std::endl;
+	//std::cout << "lmb_max : " << l + mmax(la.sum(), lb.sum()) << std::endl;
 	v2_sph.resize( l + mmax(la.sum(), lb.sum()) + 1);
 	for(int i = 0; i < v2_sph.size(); ++i)
 	{
@@ -937,7 +959,7 @@ void omega_integral::omega_run_1(std::vector<T> & v, int const & la_size, int co
 	std::vector<spherical<T> > * p_vsph = 0;
 	spherical<T> sph_buf;
 	sph_buf.reserve( 100 );
-	std::cout << "lmb_max : " << la.sum() + lb.sum() << std::endl;
+	//std::cout << "lmb_max : " << la.sum() + lb.sum() << std::endl;
 	v2_sph.resize( la.sum() + lb.sum() + 1);
 	for(int i = 0; i < v2_sph.size(); ++i)
 	{

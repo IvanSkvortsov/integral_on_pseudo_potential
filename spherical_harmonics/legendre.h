@@ -95,6 +95,7 @@ void print_polynom_4(std::ostream & out, polynom_4<T> const & pol, int const & p
 template<class T, class pT = polynom_4<T> >
 struct legendre: public polynomial<pT>
 {
+	typedef pT polynomial_type;
 	int _n, _m;
 	legendre():polynomial<pT>(), _n(0), _m(0){}
 	legendre(legendre<T, pT> const & legen):polynomial<pT>( legen ), _n(legen._n), _m(legen._m){}
@@ -113,14 +114,15 @@ struct legendre: public polynomial<pT>
 	{
 		_n = __n;
 		unsigned int _2pow_n = 1 << (_n<32?_n:31);
-		T t_2pow_n = _2pow_n;
+		T t_i2pow_n = _2pow_n;
 		for(int i = 31; i < _n; ++i)
-			t_2pow_n *= 2;
+			t_i2pow_n *= 2;
+		t_i2pow_n  = 1/t_i2pow_n;
 		this->resize( _n/2 + 1 );
-		polynom_4<T> * p_legen = this->_data;
+		pT * p_legen = this->_data;
 		for(int k = 0; k < this->_size; ++k)
 		{
-			p_legen->d = NewtonC<T>(_n, k) * NewtonC<T>(2*_n - 2*k, _n) * (k%2?-1:1) / t_2pow_n;
+			p_legen->d = NewtonC<T>(_n, k) * NewtonC<T>(2*_n - 2*k, _n) * (k%2?-1:1) * t_i2pow_n;
 			p_legen->set_zero_x();
 			p_legen->ct = _n - 2 * k;
 			//p_legen->operator[](0) = _n - 2 * k;
@@ -147,7 +149,7 @@ struct legendre: public polynomial<pT>
 		_m = __m;
 		if( !_m ) return 0;
 		int ct_pow = 0, iter = 0;//, * zero_k = new int[this->_size];
-		polynom_4<T> * p_legen = this->_data;
+		pT * p_legen = this->_data;
 		for(int k = 0; k < this->_size; ++k)
 		{
 			ct_pow = p_legen->operator[](0);
@@ -194,6 +196,14 @@ struct legendre: public polynomial<pT>
 		this->operator=(tmp);
 		*/
 		//delete [] zero_k;
+		if( abs_m%2==0 )
+			return 0;
+		pT * p = this->data();
+		for(int i = 0; i < this->size(); ++i)
+		{
+			p->d = -p->d;
+			++p;
+		}
 		return 0;
 	}
 	void run_cos_sin( int __m)

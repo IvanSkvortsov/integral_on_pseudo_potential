@@ -3,6 +3,7 @@
 #include"polynomial.h"
 #include"legendre.h"
 #include"../angular_integral/angular.omega.xyz.h"
+#include"math.h"// sqrt
 
 template<class T>
 struct polynom_xyz;
@@ -72,7 +73,7 @@ struct polynom_xyz
 	}
 	T calc_r(T const * X)const
 	{
-		return d * pow( X[0], x ) * pow( X[1], y ) * pow( X[2], z );
+		return this->d * pow( X[0], this->x ) * pow( X[1], this->y ) * pow( X[2], this->z );
 	}
 };
 
@@ -105,6 +106,7 @@ void print_polynom_xyz(std::ostream & out, polynom_xyz<T> const & pol, int const
 		//std::setw( w ) << pol.d * sigma_(pol.x+1, pol.y, pol.z) <<
 		//std::setw( w ) << pol.d * sigma_(pol.x, pol.y+1, pol.z) <<
 		//std::setw( w ) << pol.d * sigma_(pol.x, pol.y, pol.z+1) <<
+		std::setw(w_x) << ( pol.d == T(0) ? '0' : '+') <<
 		std::endl;
 }
 #endif//__polynom_xyz_PRINT__
@@ -130,6 +132,10 @@ int __3pow_n(int const & n)
 		res *= 3;
 	return res;
 }
+//#define __spherical_log__
+#ifdef  __spherical_log__
+#include<iostream>
+#endif
 //template<class T, class pT = polynom_xyz<T> >
 // TODO: in method 'optimize_less' decrease memory allocation/deallocation
 // TODO: int _n, _m -- make some class that's parent for 'spherical' and 'legendre' (reason is that both classes have _n, _m member-elements)
@@ -167,8 +173,11 @@ struct spherical : public polynomial<pT>
 		}
 		return 0;
 	}
-	int run(int const & __n, int const & __m)
+	int run(int const & __n, int const & __m, int to_norma = 1)
 	{
+#ifdef  __spherical_log__
+		this->log(std::cout, "run(int const & , int const & , int )");
+#endif
 		legendre<T> P_nm, cos_sin;
 		if( P_nm.run( __n, __m ) )
 		{
@@ -182,15 +191,17 @@ struct spherical : public polynomial<pT>
 		cos_sin.run_cos_sin( __m );
 		P_nm *= cos_sin;
 		this->run(P_nm);
-		this->normalize();
+		if( to_norma == 1 ) this->normalize();
+		else if( to_norma >= 2 ) this->normalize_4pi();
+		return 0;
 	}
 	int run(legendre<T> const & cs__P_nm)
 	{
 		this->resize( cs__P_nm.size() );
 		_n = cs__P_nm.n();
 		_m = cs__P_nm.m();
-		polynom_xyz<T> * p_xyz = this->_data;
-		polynom_4<T> const * p_4 = &cs__P_nm[0];
+		typename spherical<T>::polynomial_type * p_xyz = this->_data;
+		typename legendre<T>::polynomial_type const * p_4 = &cs__P_nm[0];
 		for(int i = 0; i < this->_size; ++i)
 		{
 			p_xyz->d = p_4->d;
@@ -205,23 +216,71 @@ struct spherical : public polynomial<pT>
 		}
 		return 0;
 	}
-	void normalize()
+	T norm()const
 	{
-		if( this->_n == 0 ) return;
-		T norma = T(this->_n * 2 + 1);
+		if( this->_n == 0 ) return T(1);
+		T norma_ = T(this->_n * 2 + 1);
 		if( this->_m == 0 )
 		{
-			norma /= (4 * T(Pi));
-			norma = sqrt( norma );
-			*this *= norma;
-			//this->polynomial<pT>::operator*=(norma);
-			return;
+			norma_ /= (4 * T(Pi));
+			norma_ = sqrt( norma_ );
+			return norma_;
 		}
 		int abs_m = (this->_m < 0 ? -this->_m : this->_m);
-		norma *= fact<T>(this->_n - abs_m) / (fact<T>( this->_n + abs_m) * 2 * T(Pi));
-		norma = sqrt(norma);
-		*this *= norma;
+		norma_ *= fact<T>(this->_n - abs_m) / (fact<T>( this->_n + abs_m) * 2 * T(Pi));
+		//norma_ = sqrt(norma_);
+		return norma_;
+	}
+	T norm_4pi()const// norm multiplied by sqrt(4 * Pi)
+	{
+		if( this->_n == 0 ) return T(1);
+		T norma_ = T(this->_n * 2 + 1);
+		if( this->_m == 0 )
+		{
+			norma_ = sqrt( norma_ );
+			return norma_;
+		}
+		int abs_m = (this->_m < 0 ? -this->_m : this->_m);
+		norma_ *= fact<T>(this->_n - abs_m) * T(2) / fact<T>( this->_n + abs_m);
+		//norma_ = sqrt(norma_);
+		return norma_;
+	}
+	T normalize()
+	{
+		if( this->_n == 0 ) return T(1)/sqrt(4 * T(Pi));
+		T norma_ = T(this->_n * 2 + 1);
+		if( this->_m == 0 )
+		{
+			norma_ /= (4 * T(Pi));
+			norma_ = sqrt( norma_ );
+			*this *= norma_;
+			//this->polynomial<pT>::operator*=(norma_);
+			return norma_;
+		}
+		int abs_m = (this->_m < 0 ? -this->_m : this->_m);
+		norma_ *= fact<T>(this->_n - abs_m) / (fact<T>( this->_n + abs_m) * 2 * T(Pi));
+		norma_ = sqrt(norma_);
+		*this *= norma_;
 		//this->polynomial<pT>::operator*=(norma);
+		return norma_;
+	}
+	T normalize_4pi()// norm multiplied by sqrt(4 * Pi)
+	{
+		if( this->_n == 0 ) return T(1);
+		T norma_ = T(this->_n * 2 + 1);
+		if( this->_m == 0 )
+		{
+			norma_ = sqrt( norma_ );
+			*this *= norma_;
+			//this->polynomial<pT>::operator*=(norma_);
+			return norma_;
+		}
+		int abs_m = (this->_m < 0 ? -this->_m : this->_m);
+		norma_ *= fact<T>(this->_n - abs_m) * T(2) / fact<T>( this->_n + abs_m);
+		norma_ = sqrt(norma_);
+		*this *= norma_;
+		//this->polynomial<pT>::operator*=(norma);
+		return norma_;
 	}
 	void optimize_less()
 	{
@@ -296,9 +355,11 @@ struct spherical : public polynomial<pT>
 	}
 	void optimize()
 	{
-		this->optimize_ez();
-		//this->optimize_less();
-		//this->optimize_ez();
+		this->optimize_equal();
+		this->optimize_zero();
+		this->optimize_less();
+		this->optimize_equal();
+		this->optimize_zero();
 	}
 	static void generate(scp_array<spherical<T, pT> > & v_spher, int __n )
 	{
@@ -315,9 +376,16 @@ struct spherical : public polynomial<pT>
 			p_spher->n( __n );
 			p_spher->m( __m );
 			p_spher->run( cs__P_nm );
-			p_spher++->optimize();
+			p_spher++->optimize_ez();
 		}
 	}
+private:
+#ifdef  __spherical_log__
+	void log(std::ostream & out, std::string s)const
+	{
+		out << "[" << this << "] spherical<T>::" << s << std::endl;
+	}
+#endif
 };
 
 
@@ -348,6 +416,17 @@ void title_print(std::ostream & out, int const & line_size, std::string const & 
 template<class T>
 void print_spherical(std::ostream & out, spherical<T> const & spher, int const & n, int const & m)
 {
+	if( n != spher.n() || m != spher.m() )
+	{
+#ifdef  __spherical_error_message_ON__
+		std::cerr << "Error : [print_spherical]" << std::endl;
+		std::cerr << "n : " << n << std::endl;
+		std::cerr << "m : " << m << std::endl;
+		std::cerr << "s.n() : " << spher.n() << std::endl;
+		std::cerr << "s.m() : " << spher.m() << std::endl;
+#endif
+		//return;
+	}
 	int p = 4, w = p + 8, w_x = 6, sz = 0;
 	out.setf( std::ios::scientific );
 	out.precision( p );

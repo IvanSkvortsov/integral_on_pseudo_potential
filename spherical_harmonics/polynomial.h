@@ -17,8 +17,10 @@ bool is_zero_f(T const & x)
 	if( x == T(0) )
 		return true;
 	if( x < T(0) )
+	{
 		if( -x < T(__zero_float) ) return true;
 		else return false;
+	}
 	else if( x < T(__zero_float) )
 		return true;
 	return false;
@@ -51,7 +53,7 @@ struct polynomial: public scp_array<pT>
 			return *this;
 		polynomial<pT> tmp( *this );
 		this->resize( old_size + v_size );
-		this->operator=( tmp );
+		*this = tmp;
 		this->resize( old_size + v_size );
 		for(int i = 0; i < v_size; ++i)
 			this->_data[i+old_size] = v[i];
@@ -141,26 +143,20 @@ struct polynomial: public scp_array<pT>
 	{
 		int iter = 0;
 		pT * p_a = this->_data, * p_b = p_a + this->_size - 1, tmp_v;
-		for(int i = 0; i < this->_size; ++i)
+		while( p_a < p_b )
 		{
 			if( is_zero_f<value_type>( p_a->d ) )
 			{
-				if( p_a > p_b )
-					break;
-				for(int j = i+1; j < this->_size; ++j)
+				while( is_zero_f<value_type>( p_b->d ) && p_b > p_a )
 				{
-					if( !is_zero_f<value_type>( p_b->d ) )
-					{
-						tmp_v = *p_a;
-						*p_a = *p_b;
-						*p_b = tmp_v;
-						--p_b;
-						break;
-					}
-					else
-						++iter;
 					--p_b;
+					++iter;
 				}
+				tmp_v.operator=( *p_a );// tmp_v = *p_a;
+				p_a->operator=(*p_b);// *p_a = *p_b;
+				p_b->operator=(tmp_v);// *p_b = tmp_v;
+				//
+				--p_b;
 				++iter;
 			}
 			++p_a;
