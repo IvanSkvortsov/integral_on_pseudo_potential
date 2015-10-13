@@ -11,7 +11,7 @@ void qu_run_1(std::vector<T> & v, int & N_size, int & lmb_a_size, int & lmb_b_si
 {
 	qu_integral::Qu_resize_1(v, N_size, lmb_a_size, lmb_b_size, la, lb, l);
 	recursion<T> recurs;
-	recurs_resize_1<T>( recurs, la, lb, l, n );
+	recurs_resize_acb_sl<T>( recurs, la, lb, l, n );
 	recursion_elem<T> elc;
 	elc.init_a( alp_i + alp_j + alp_k );
 	T ka[3];
@@ -49,7 +49,7 @@ void qu_run_2(std::vector<T> & v, int & N_size, int & lmb_size, T const * B, T c
 {
 	qu_integral::Qu_resize_2(v, N_size, lmb_size, la, lb, l);
 	recursion<T> recurs;
-	recurs_resize_2<T>( recurs, la, lb, l, n );
+	recurs_resize_ccb_sl<T>( recurs, la, lb, l, n );
 	recursion_elem<T> elc;
 	elc.init_a( alp_i + alp_j + alp_k );
 	T kb[3];
@@ -79,7 +79,7 @@ void qu_run_1(std::vector<T> & v, int & N_size, int & lmb_size, T const * A, T c
 		int const & la, int const & lb, int const & n, T const & alp_i, T const & alp_j, T const & alp_k)
 {
 	recursion<T> recurs;
-	recurs_resize_1<T>( recurs, la, lb, n );
+	recurs_resize_acb_l<T>( recurs, la, lb, n );
 	recursion_elem<T> elc;
 	elc.init_a( alp_i + alp_j + alp_k );
 	T ka[3];
@@ -114,7 +114,7 @@ void qu_run_2(std::vector<T> & v, int & N_size, int & lmb_size, T const * B, T c
 		int const & la, int const & lb, int const & n, T const & alp_i, T const & alp_j, T const & alp_k)
 {
 	recursion<T> recurs;
-	recurs_resize_2<T>( recurs, la, lb, n );
+	recurs_resize_ccb_l<T>( recurs, la, lb, n );
 	recursion_elem<T> elc;
 	elc.init_a( alp_i + alp_j + alp_k );
 	T kb[3];

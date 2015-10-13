@@ -898,7 +898,7 @@ void omega_integral::omega_run_1(std::vector<T> & v, int const & la_size, int co
 		p_vsph = &v2_sph[i];
 		p_vsph->resize(2 * i + 1);
 		for(int j = 0; j < p_vsph->size(); ++j)
-			(*p_vsph)[j].run(i, j-i);
+			(*p_vsph)[j].run(i, j-i, 2);
 	}
 	// spherical r
 	std::vector<std::vector<T> > v2sph_ra(lmb_a_size), v2sph_rb(lmb_b_size);
@@ -966,7 +966,7 @@ void omega_integral::omega_run_1(std::vector<T> & v, int const & la_size, int co
 		p_vsph = &v2_sph[i];
 		p_vsph->resize(2 * i + 1);
 		for(int j = 0; j < p_vsph->size(); ++j)
-			(*p_vsph)[j].run(i, j-i);
+			(*p_vsph)[j].run(i, j-i, 2);
 	}
 	// spherical r
 	std::vector<std::vector<T> > v2sph_r(lmb_size);
@@ -1028,7 +1028,7 @@ void omega_integral::omega_run_2(std::vector<T> & v, int const & lb_size, int co
 		p_vsph = &v2_sph[i];
 		p_vsph->resize(2 * i + 1);
 		for(int j = 0; j < p_vsph->size(); ++j)
-			(*p_vsph)[j].run(i, j-i);
+			(*p_vsph)[j].run(i, j-i, 2);
 	}
 	// spherical r
 	std::vector<std::vector<T> > v2sph_rb(lmb_size);
@@ -1086,7 +1086,7 @@ void omega_integral::omega_run_2(std::vector<T> & v, int const & lb_size, int co
 		p_vsph = &v2_sph[i];
 		p_vsph->resize(2 * i + 1);
 		for(int j = 0; j < p_vsph->size(); ++j)
-			(*p_vsph)[j].run(i, j-i);
+			(*p_vsph)[j].run(i, j-i, 2);
 	}
 	// spherical r
 	std::vector<std::vector<T> > v2sph_rb(lmb_size);

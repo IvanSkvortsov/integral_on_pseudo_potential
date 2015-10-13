@@ -75,7 +75,7 @@ void qu_integral::Qu_run(std::vector<T> & v, int const & N_size, int const & lmb
 		T const & ka, T const & kb, T const * tau, T const * sigma, T const * _sigma, T const * rho)
 {
 	T * p = v.data();
-	int N = n;
+	int N = n + 2;
 	for(int N_n = 0; N_n < N_size; ++N_n)
 	{
 		for(int lmb_a = 0; lmb_a < lmb_a_size; ++lmb_a)
@@ -93,7 +93,7 @@ void qu_integral::Qu_run(std::vector<T> & v, int const & N_size, int const & lmb
 		T const * kappa, T const * eta)
 {
 	T * p = v.data();
-	int N = n;
+	int N = n + 2;
 	for(int N_n = 0; N_n < N_size; ++N_n)
 	{
 		for(int lmb = 0; lmb < lmb_size; ++lmb)
@@ -110,20 +110,20 @@ T qu_integral::Qu(int const & N, int const & lmb_a, int const & lmb_b, T const &
 {
 	//typedef long long int llz;
 	int N_i, N_ij;
-	int la_p = lmb_a + 1, lb_p = lmb_b + 1;
-	T pow_ka_ = T(1), pow_kab_;
+	//int la_p = lmb_a + 1, lb_p = lmb_b + 1;
+	T pow_ika_ = T(1), pow_ikab_, _ika = T(1)/ka, _ikb = T(1)/kb;
 	T aa, ab, bb, ba, a_, b_, _a, _b;
 	T val = 0;
-	for(int i = 1; i <= la_p; ++i)
+	N_i = N - 2;
+	for(int i = 0; i <= lmb_a; ++i)
 	{
-		N_i = N - i;
-		pow_ka_ *= ka;
+		pow_ika_ *= _ika;
 		a_ = hankel::alpha<T>(i, lmb_a);
 		b_ = hankel::beta <T>(i, lmb_a);
-		pow_kab_ = pow_ka_;
-		for(int j = 1; j <= lb_p; ++j)
+		pow_ikab_ = pow_ika_;
+		N_ij = N_i;// N - i - j - 2
+		for(int j = 0; j <= lmb_b; ++j)
 		{
-			N_ij = N_i - j;
 			_a = hankel::alpha<T>(j, lmb_b);
 			_b = hankel::beta <T>(j, lmb_b);
 
@@ -132,29 +132,57 @@ T qu_integral::Qu(int const & N, int const & lmb_a, int const & lmb_b, T const &
 			bb = b_ * _b;
 			ba = b_ * _a;
 
-			pow_kab_ *= kb;
-			val += ( aa * tau[N_ij] + bb * rho[N_ij] - ba * sigma[N_ij] - ab * _sigma[N_ij] ) / pow_kab_;
+			pow_ikab_ *= _ikb;
+			val += ( aa * tau[N_ij] + bb * rho[N_ij] - ba * sigma[N_ij] - ab * _sigma[N_ij] ) * pow_ikab_;
+			--N_ij;
 		}
+		--N_i;
 	}
 	return val * ((lmb_a - lmb_b)%2 ? -1 : 1);
 }
 
+#include<stdlib.h>
+
 template<class T> 
 T qu_integral::Qu(int const & N, int const & lmb, T const & k, T const * kappa, T const * eta)
 {
-	int N_i, lp = lmb + 1;
-	T pow_k_ = T(1);
-	T a, b;
-	T val = 0;
-	for(int i = 1; i <= lp; ++i)
+	if( lmb == 0 ) return eta[N-1]/k;
+	if( lmb == 1 )
 	{
-		N_i = N - i;
-		pow_k_ *= k;
-		a = hankel::alpha<T>(i, lmb);
-		b = hankel::beta <T>(i, lmb);
-		val += (a * kappa[N_i] - b * eta[N_i]) / pow_k_;
+		T _ik = T(1) / k;
+		return (kappa[N-1] - eta[N-2] * _ik) * _ik;
 	}
-	return val * (lp%2 ? -1 : 1);
+	if( lmb == 2 )
+	{
+		T _ik = T(1) / k;
+		//return (eta[N-1] + 3 * (-kappa[N-2] + eta[N-3] * _ik) * _ik ) * _ik;
+		return ((eta[N-3] * _ik - kappa[N-2]) * T(3) * _ik + eta[N-1] ) * _ik;
+	}
+	if( lmb == 3 )
+	{
+		T _ik = T(1) / k;
+		//return (((kappa[N-3] - eta[N-4] * _ik) * 15 * _ik - eta[N-2]) * 6 * _ik + kappa[N-1]) * _ik;
+		return (kappa[N-1] + (-6 * eta[N-2] + 15 * (kappa[N-3] - eta[N-4] * _ik) * _ik) * _ik) * _ik;
+		//return (kappa[N-1] - (6 * eta[N-2] - (15 * (kappa[N-3] - eta[N-4] * _ik) * _ik) * _ik) * _ik;
+	}
+	int N_i = N - 1;
+	T pow_ik_ = T(1), _ik = T(1)/k;
+	T a = 1, b = 1;
+	T val = T(0);
+	for(int i = 0; i <= lmb; ++i)
+	{
+		pow_ik_ *= _ik;
+		a = hankel::alpha<T>(i, lmb);// i:=0 if( lmb%2 == 1 )
+		b = hankel::beta <T>(i, lmb);// i:=0 if( lmb%2 == 0 )
+		val += (b * eta[N_i] - a * kappa[N_i]) * pow_ik_;
+		//val += (eta[N_i] + kappa[N_i]);
+		//val += (a * kappa[N_i] - b * eta[N_i]) * pow_ik_;
+		--N_i;
+	}
+	//return 1;
+	//return val;
+	//return val * (lmb%2 ? 1 : -1);
+	return val * (lmb%2 ? -1 : 1);
 }
 
 

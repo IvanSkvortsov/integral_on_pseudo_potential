@@ -73,6 +73,7 @@ struct polynom_xyz
 	}
 	T calc_r(T const * X)const
 	{
+		//return this->d * pow_int<T>( X[0], this->x ) * pow_int<T>( X[1], this->y ) * pow_int<T>( X[2], this->z );
 		return this->d * pow( X[0], this->x ) * pow( X[1], this->y ) * pow( X[2], this->z );
 	}
 };
@@ -193,6 +194,7 @@ struct spherical : public polynomial<pT>
 		this->run(P_nm);
 		if( to_norma == 1 ) this->normalize();
 		else if( to_norma >= 2 ) this->normalize_4pi();
+		//if( this->_m%2 ) *this *= T(-1);
 		return 0;
 	}
 	int run(legendre<T> const & cs__P_nm)

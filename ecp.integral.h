@@ -108,11 +108,11 @@ T ecp_local_integral_1(Primitive<T> const & a, Primitive<T> const & b, ecp_primi
 		}
 	}
 	//return value;
-	T _4_pi = 4 * T(Pi), _sqr_4Pi = _4_pi * _4_pi;
+	T _4Pi = 4 * T(Pi);
 	T sqr_CA = T(0); for(int i = 0; i < 3; ++i) sqr_CA += CA[i] * CA[i];
 	T sqr_CB = T(0); for(int i = 0; i < 3; ++i) sqr_CB += CB[i] * CB[i];
 	T exp_ca = exp( -a.alp * sqr_CA ), exp_cb = exp( -b.alp * sqr_CB );
-	return _sqr_4Pi * exp_ca * exp_cb * value;
+	return _4Pi * exp_ca * exp_cb * value;
 }
 
 template<class T>
@@ -150,11 +150,11 @@ T ecp_semi_local_integral_1(Primitive<T> const & a, Primitive<T> const & b, ecp_
 		}
 	}
 	//return value;
-	T _4_pi = 4 * T(Pi), _sqr_4Pi = _4_pi * _4_pi;
+	T _4_pi = 4 * T(Pi);
 	T sqr_CA = T(0); for(int i = 0; i < 3; ++i) sqr_CA += CA[i] * CA[i];
 	T sqr_CB = T(0); for(int i = 0; i < 3; ++i) sqr_CB += CB[i] * CB[i];
-	T exp_ca = exp( -a.alp * sqr_CA ), exp_cb = exp( -b.alp * sqr_CB );
-	return _sqr_4Pi * _sqr_4Pi * exp_ca * exp_cb * value;
+	T exp_v = exp( -a.alp * sqr_CA - b.alp * sqr_CB );
+	return _4_pi * exp_v * value;
 }
 
 template<class T>
@@ -185,10 +185,10 @@ T ecp_semi_local_integral_2(Primitive<T> const & a, Primitive<T> const & b, ecp_
 			value += ang[nb * lmb_size + lmb_b] * rad[nb * lmb_size + lmb_b];
 	}
 	//return value;
-	T _4Pi = 4 * T(Pi), _sqr_4Pi = _4Pi * _4Pi;
+	T _4Pi = 4 * T(Pi);
 	T sqr_CB = T(0); for(int i = 0; i < 3; ++i) sqr_CB += CB[i] * CB[i];
 	T exp_cb = exp( -b.alp * sqr_CB );
-	return _sqr_4Pi * _4Pi * exp_cb * value;
+	return _4Pi * exp_cb * value;
 }
 
 template<class T>
@@ -240,7 +240,7 @@ T ecp_semi_local_integral_3(Primitive<T> const & a, Primitive<T> const & b, ecp_
 		ang += sa * sb;
 	}
 	T _4Pi = 4 * T(Pi);
-	ang *= _4Pi * _4Pi;
+	ang *= 1;//_4Pi * _4Pi;
 	// radial integral
 	int N = la + lb + ecp.n;
 	T alp = a.alp + b.alp + ecp.alp;

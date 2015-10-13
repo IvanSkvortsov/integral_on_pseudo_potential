@@ -1,6 +1,7 @@
 #ifndef __LEGENDRE_H__
 #define __LEGENDRE_H__
 #include"polynomial.h"
+#include"math.h"// pow
 //#include"../../lib_math/math.functions.h"// NewtonC, par_fact
 //#include"../../lib_math/math.constants.h"// Pi, sqrtPi, etc.
 #include"../lib_math/math.functions.h"// NewtonC, par_fact
@@ -45,7 +46,7 @@ struct polynom_4
 	}
 	T calc_r(T const * X)const
 	{
-		return d * pow(X[0], ct) * pow(X[1], st) * pow(X[2], cp) * pow(X[3], sp);
+		return d * pow_int<T>(X[0], ct) * pow_int<T>(X[1], st) * pow_int<T>(X[2], cp) * pow_int<T>(X[3], sp);
 	}
 };
 
@@ -112,19 +113,19 @@ struct legendre: public polynomial<pT>
 	int const & m()const{return _m;}
 	void run( int __n)
 	{
-		_n = __n;
-		unsigned int _2pow_n = 1 << (_n<32?_n:31);
-		T t_i2pow_n = _2pow_n;
-		for(int i = 31; i < _n; ++i)
+		this->_n = __n;
+		unsigned int _2pow_n = 1 << (this->_n<31?this->_n:30);
+		T t_i2pow_n = T(_2pow_n);
+		for(int i = 30; i < this->_n; ++i)
 			t_i2pow_n *= 2;
 		t_i2pow_n  = 1/t_i2pow_n;
-		this->resize( _n/2 + 1 );
+		this->resize( this->_n/2 + 1 );
 		pT * p_legen = this->_data;
-		for(int k = 0; k < this->_size; ++k)
+		for(int k = 0; k < this->size(); ++k)
 		{
-			p_legen->d = NewtonC<T>(_n, k) * NewtonC<T>(2*_n - 2*k, _n) * (k%2?-1:1) * t_i2pow_n;
+			p_legen->d = NewtonC<T>(this->_n, k) * NewtonC<T>(2*this->_n - 2*k, this->_n) * (k%2?-1:1) * t_i2pow_n;
 			p_legen->set_zero_x();
-			p_legen->ct = _n - 2 * k;
+			p_legen->ct = this->_n - 2 * k;
 			//p_legen->operator[](0) = _n - 2 * k;
 			p_legen++;
 		}
@@ -137,7 +138,7 @@ struct legendre: public polynomial<pT>
 	int run_m( int __m)
 	{
 		int abs_m = (__m < 0? -__m : __m);
-		if( abs_m > _n )
+		if( abs_m > this->_n )
 		{
 #ifdef  __legendre_error_message_ON_
 			std::cerr << "Error: legendre<T, pT>::run_m(int __m)" << std::endl;
@@ -170,14 +171,16 @@ struct legendre: public polynomial<pT>
 			}
 			++p_legen;
 		}
-		if( !iter )
-		{
+		//if( !iter )
+		//{
 			//delete [] zero_k;
-			return 0;
-		}
+		//	return 0;
+		//}
 		// little optimization
 		// fast variant
-		this->resize( this->_size - iter );
+		//this->resize( this->_size - iter );
+		this->_size -= iter;
+		return 0;
 		/*
 		legendre<T, pT> tmp( this->_size - iter );
 		p_legen = &tmp[0];

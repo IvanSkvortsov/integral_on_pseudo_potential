@@ -30,10 +30,10 @@
 // alp_k -> ECP_alp(k)
 // 
 // v_bc   - the functions B and C (see above);
-// sh_bc  - shifted pointer to &v_bc[0] - begin;
+// sh_bc  - shifted pointer to &v_bc[0] - min_n;
 // _g     - the function G (see above);
-// _begin - relative address of sh_bc[0] with reference address is &v_bc[0]
-// _end   - sh_bc[_end] -eq v_bc[size], where size := _end - _begin;
+// _min_n - relative address of sh_bc[0] with reference address is &v_bc[0]
+// _max_n   - sh_bc[_max_n] -eq v_bc[size], where size := _max_n - _min_n;
 //
 // recursion_bc<T> - structure that contains 2 variables of type plus_minus<T> : b, c;
 // plus_minus<T> - structure that also contains 2 variables but type of T: p, m;
@@ -55,7 +55,7 @@ protected:
 	std::vector<recursion_bc<T> > v_bc;
 	recursion_bc<T> * sh_bc;
 	plus_minus<T> _g;
-	int _begin, _end;
+	int _min_n, _max_n;
 	void set_zero();
 #ifdef  __recursion_log__
 	void log(std::string const & s)const;
@@ -72,13 +72,13 @@ public:
 	void reserve(std::size_t _sz){v_bc.reserve(_sz );}
 	const std::size_t size()const{return v_bc.size();}
 	const std::size_t capacity()const{return v_bc.capacity();}
-	// begin, end
-	int begin(int __begin){return _begin = __begin;}
-	int end(int __end ){return _end = __end;}
-	int & begin(){return _begin;}
-	int & end(){return _end;}
-	const int & begin()const{return _begin;}
-	const int & end()const{return _end;}
+	// min_n, max_n
+	int min_n(int __min_n){return _min_n = __min_n;}
+	int max_n(int __max_n ){return _max_n = __max_n;}
+	int & min_n(){return _min_n;}
+	int & max_n(){return _max_n;}
+	const int & min_n()const{return _min_n;}
+	const int & max_n()const{return _max_n;}
 	// operator[]
 	recursion_bc<T> & operator[](int i){return v_bc[i];}
 	recursion_bc<T> const & operator[](int i)const{return v_bc[i];}
@@ -95,7 +95,7 @@ public:
 	T const & gm()const{return _g.m;}
 	// resize
 	int resize();
-	int resize(int __begin, int __end );
+	int resize(int __min_n, int __max_n );
 	// run_3
 	void run_0_eq_3( recursion_elem<T> const & );
 	void run_p1_geq_3( recursion_elem<T> const & );
@@ -114,30 +114,30 @@ public:
 	void run_1(recursion_elem<T> const & elc){this->run( elc );}
 	// print
 #ifdef  __recursion_print__
-	void print(std::ostream & out)const;
+	void print(std::ostream & out = std::cout)const;
 #endif
 };
 
 template<class T>
-void recurs_resize_1(recursion<T> & recurs, int const & la, int const & lb, int const & l, int const & n)
+void recurs_resize_acb_sl(recursion<T> & recurs, int const & la, int const & lb, int const & l, int const & n)
 {
-	recurs.resize( n - 2*(l + 1), la + lb + n - 2);
+	recurs.resize( n - 2*(l + 1) + 2, la + lb + n - 2 + 2);
 }
 template<class T>
-void recurs_resize_1(recursion<T> & recurs, int const & la, int const & lb, int const & n)
+void recurs_resize_acb_l(recursion<T> & recurs, int const & la, int const & lb, int const & n)
 {
-	recurs.resize( n - 1, la + lb + n - 1);
+	recurs.resize( n - 1 + 2, la + lb + n - 1 + 2);
 }
 
 template<class T>
-void recurs_resize_2(recursion<T> & recurs, int const & la, int const & lb, int const & l, int const & n)
+void recurs_resize_ccb_sl(recursion<T> & recurs, int const & la, int const & lb, int const & l, int const & n)
 {
-	recurs.resize( la + n - l - 1, la + lb + n - 1);
+	recurs.resize( la + n - l - 1 + 2, la + lb + n - 1 + 2);
 }
 template<class T>
-void recurs_resize_2(recursion<T> & recurs, int const & la, int const & lb, int const & n)
+void recurs_resize_ccb_l(recursion<T> & recurs, int const & la, int const & lb, int const & n)
 {
-	recurs.resize( n - 1, la + lb + n - 1);
+	recurs.resize( n - 1 + 2, la + lb + n - 1 + 2);
 }
 
 template<class T>
@@ -195,12 +195,12 @@ template<class T>
 void recursion<T>::set_zero()
 {
 	sh_bc = 0;
-	_begin = 0;
-	_end = 0;
+	_min_n = 0;
+	_max_n = 0;
 }
 // recursion()
 template<class T>
-recursion<T>::recursion():v_bc(), sh_bc(0), _g(), _begin(0), _end(0)
+recursion<T>::recursion():v_bc(), sh_bc(0), _g(), _min_n(0), _max_n(0)
 {
 #ifdef  __recursion_log__
 	log("recursion()");
@@ -208,7 +208,7 @@ recursion<T>::recursion():v_bc(), sh_bc(0), _g(), _begin(0), _end(0)
 }
 // recursion( recursion<T> const & )
 template<class T>
-recursion<T>::recursion(recursion<T> const & rcsn):v_bc(rcsn.v_bc), sh_bc(v_bc.data() - rcsn._begin), _g(rcsn._g), _begin(rcsn._begin), _end(rcsn._end)
+recursion<T>::recursion(recursion<T> const & rcsn):v_bc(rcsn.v_bc), sh_bc(v_bc.data() - rcsn._min_n), _g(rcsn._g), _min_n(rcsn._min_n), _max_n(rcsn._max_n)
 {
 #ifdef  __recursion_log__
 	log("recursion(recursion<T> const &)");
@@ -234,72 +234,72 @@ recursion<T> & recursion<T>::operator=(recursion<T> const & rcsn)
 	recursion<T> tmp(rcsn);
 	swap(v_bc, tmp.v_bc);
 	swap(_g, tmp._g);
-	swap(_begin, tmp._begin);
-	swap(_end, tmp._end);
-	sh_bc = &v_bc[0] - _begin;
+	swap(_min_n, tmp._min_n);
+	swap(_max_n, tmp._max_n);
+	sh_bc = &v_bc[0] - _min_n;
 	return *this;
 }
 // resize
 template<class T>
 int recursion<T>::resize()
 {
-	//if( _end <= _begin )
-	if( _end < _begin )
+	//if( _max_n <= _min_n )
+	if( _max_n < _min_n )
 	{
 #ifdef  __recursion_err_msg__
 		std::cerr << "Error: recursion<T>::resize()" << std::endl;
-		std::cerr << "begin: " << _begin << std::endl;
-		std::cerr << "end  : " << _end << std::endl;
+		std::cerr << "min_n: " << _min_n << std::endl;
+		std::cerr << "max_n: " << _max_n << std::endl;
 #endif
 		return -1;
 	}
 	int sz = 0;
-	//if( _end <= 0 )
-	if( _end < 0 )
-		sz = 1 - _begin;// include zero's element
+	//if( _max_n <= 0 )
+	if( _max_n < 0 )
+		sz = 1 - _min_n;// include zero's element
 	else
-		if( _begin > 0 )
-			sz = 1 + _end;// include zero's element
+		if( _min_n > 0 )
+			sz = 1 + _max_n;// include zero's element
 		else
-			sz = 1 + _end - _begin;// already contains zero's element
+			sz = 1 + _max_n - _min_n;// already contains zero's element
 	v_bc.resize( sz );
-	//sh_bc = &v_bc[0] - _begin;
-	sh_bc = &v_bc[0] - (_begin > 0 ? 0 : _begin );
+	//sh_bc = &v_bc[0] - _min_n;
+	sh_bc = &v_bc[0] - (_min_n > 0 ? 0 : _min_n );
 	return 1;
 }
-// begin and end values setting with corresponding memory allocation for vector<p_recursion_bc<T> > v_bc;
+// min_n and end values setting with corresponding memory allocation for vector<p_recursion_bc<T> > v_bc;
 template<class T>
-int recursion<T>::resize(int __begin, int __end )
+int recursion<T>::resize(int __min_n, int __max_n )
 {
 #ifdef  __recursion_log__
 	log("resize(int ,int )");
 #endif
-	if( __begin > __end )
+	if( __min_n > __max_n )
 	{
 #ifdef  __recursion_err_msg__
 		std::cerr << "Error: recursion<T>::resize(int, int)" << std::endl;
-		std::cerr << "begin: " << __begin << std::endl;
-		std::cerr << "end  : " << __end << std::endl;
+		std::cerr << "min_n: " << __min_n << std::endl;
+		std::cerr << "max_n: " << __max_n << std::endl;
 #endif
 		return -1;
 	}
 	int sz = 0;
-	_begin = __begin; _end = __end;
-	if( _end < 0 )
-		sz = 1 - _begin;
+	_min_n = __min_n; _max_n = __max_n;
+	if( _max_n < 0 )
+		sz = 1 - _min_n;
 	else
-		if( _begin > 0 )
-			sz = 1 + _end;
+		if( _min_n > 0 )
+			sz = 1 + _max_n;
 		else
-			sz = 1 + _end - _begin;
+			sz = 1 + _max_n - _min_n;
 	v_bc.resize( sz );
-	sh_bc = &v_bc[0] - (_begin > 0 ? 0 : _begin );
+	sh_bc = &v_bc[0] - (_min_n > 0 ? 0 : _min_n );
 	int __w = 16;
 #ifdef  __recursion_log__
 	std::cout << "------- recursion<T>::resize(int, int) ------" << std::endl;
 	std::cout << std::setw( __w ) << "size : " << v_bc.size() << std::endl;
-	std::cout << std::setw( __w ) << "begin : " << _begin << std::endl;
-	std::cout << std::setw( __w ) << "end : " << _end << std::endl;
+	std::cout << std::setw( __w ) << "min_n : " << _min_n << std::endl;
+	std::cout << std::setw( __w ) << "max_n : " << _max_n << std::endl;
 #endif
 	if( v_bc.size() == 0 )
 	{
@@ -309,14 +309,14 @@ int recursion<T>::resize(int __begin, int __end )
 		return -2;
 	}
 	//
-	if( _end - _begin != v_bc.size() - 1 )
+	if( _max_n - _min_n != v_bc.size() - 1 )
 	{
 #ifdef  __recursion_warn_msg__
 		std::cerr << "Warning: recursion<T>::resize(int, int)" << std::endl;
-		std::cerr << std::setw(__w) << "end - begin : " << _end-_begin << std::endl;
+		std::cerr << std::setw(__w) << "max_n - min_n : " << _max_n-_min_n << std::endl;
 		std::cerr << std::setw(__w) << "size - 1 : " << v_bc.size()-1 << std::endl;
-		std::cerr << std::setw( __w ) << "begin : " << _begin << std::endl;
-		std::cerr << std::setw( __w ) << "end : " << _end << std::endl;
+		std::cerr << std::setw( __w ) << "min_n : " << _min_n << std::endl;
+		std::cerr << std::setw( __w ) << "max_n : " << _max_n << std::endl;
 #endif
 		return -3;
 	}
@@ -373,7 +373,7 @@ void recursion<T>::run_0_eq_3( recursion_elem<T> const & elc )
 	c -> p = elc.sqrt_pialp * elc.erf_ap;
 }
 
-// _end >= 1
+// _max_n >= 1
 template<class T>
 void recursion<T>::run_p1_geq_3( recursion_elem<T> const & elc )
 {
@@ -391,7 +391,7 @@ void recursion<T>::run_p1_geq_3( recursion_elem<T> const & elc )
 
 	// ptr ---- &sh_bc[1]
 	int im1 = 1;
-	for( int i = 2; i <= _end; ++i )
+	for( int i = 2; i <= _max_n; ++i )
 	{
 		ptr_1 = ptr;// &sh_bc[1]
 		ptr_2 = ptr_1 - 1;// &sh_bc[0]
@@ -472,7 +472,7 @@ void recursion<T>::run_m3_leq_3( recursion_elem<T> const & elc )
 	T pow_ka_p_kb_x2 = 2 * ka_p_kb;
 	//T pow_ka_m_kb_x2 = 2 * abs__ka_m_kb;
 	int fac_im1 = 1, im1 = 2;
-	for( int i = 3; i <= -_begin; ++i )
+	for( int i = 3; i <= -_min_n; ++i )
 	{
 		fac_im1 *= im1;
 		pow_ka_p_kb_x2 *= ka_p_kb;
@@ -513,13 +513,13 @@ void recursion<T>::run_3( recursion_elem<T> const & elc )
 	std::cout << "-------- recursion<T>::run(recursion_elem<T> const &) [" << this << "] --------" << std::endl;
 #endif
 	run_0_eq_3( elc );// sh_bc[0] initialization
-	if( _end > 0 )
-		run_p1_geq_3( elc );// _end >= 1
-	if( _begin == -1 )
+	if( _max_n > 0 )
+		run_p1_geq_3( elc );// _max_n >= 1
+	if( _min_n == -1 )
 		return run_m1_eq_3( elc );
-	if( _begin == -2 )
+	if( _min_n == -2 )
 		return run_m2_eq_3( elc );
-	if( _begin < -2 )
+	if( _min_n < -2 )
 		return run_m3_leq_3( elc );
 }
 
@@ -541,7 +541,7 @@ void recursion<T>::run_0_eq( recursion_elem<T> const & elc )
 	c -> p = elc.sqrt_pialp * elc.erf_ap;
 }
 
-// _end >= 1
+// _max_n >= 1
 template<class T>
 void recursion<T>::run_p1_geq( recursion_elem<T> const & elc )
 {
@@ -559,7 +559,7 @@ void recursion<T>::run_p1_geq( recursion_elem<T> const & elc )
 
 	// ptr ---- &sh_bc[1]
 	int im1 = 1;
-	for( int i = 2; i <= _end; ++i )
+	for( int i = 2; i <= _max_n; ++i )
 	{
 		ptr_1 = ptr;// &sh_bc[1]
 		ptr_2 = ptr_1 - 1;// &sh_bc[0]
@@ -639,7 +639,7 @@ void recursion<T>::run_m3_leq( recursion_elem<T> const & elc )
 	T pow_ka_p_kb_x2 = 2 * ka_p_kb;
 	T pow_ka_m_kb_x2 = 2 * abs__ka_m_kb;
 	int fac_im1 = 1, im1 = 2;
-	for( int i = 3; i <= -_begin; ++i )
+	for( int i = 3; i <= -_min_n; ++i )
 	{
 		fac_im1 *= im1;
 		pow_ka_p_kb_x2 *= ka_p_kb;
@@ -680,13 +680,13 @@ void recursion<T>::run( recursion_elem<T> const & elc )
 	std::cout << "-------- recursion<T>::run(recursion_elem<T> const &) [" << this << "] --------" << std::endl;
 #endif
 	run_0_eq( elc );// sh_bc[0] initialization
-	if( _end > 0 )
-		run_p1_geq( elc );// _end >= 1
-	if( _begin == -1 )
+	if( _max_n > 0 )
+		run_p1_geq( elc );// _max_n >= 1
+	if( _min_n == -1 )
 		return run_m1_eq( elc );
-	if( _begin == -2 )
+	if( _min_n == -2 )
 		return run_m2_eq( elc );
-	if( _begin < -2 )
+	if( _min_n < -2 )
 		return run_m3_leq( elc );
 }
 
@@ -705,19 +705,28 @@ void recursion<T>::print(std::ostream & out)const
 	recursion_bc<T> const * p_i;
 	plus_minus<T> const * b, * c;
 	int w = 26, p = 16;
+	std::string s = " recursion ";
+	int t_w = 4*w + 4 - s.size();
+	int w_ = t_w/2;
 	out.setf( std::ios::scientific );
-	for(int i = _begin; i <= _end; ++i)
+	out.precision( p );
+	for(int i = 0; i < w_; ++i) out << '-'; out << s; for(int i = 0; i < t_w -w_; ++i) out << '-'; out << std::endl;
+	out <<  std::setw(4) << "i" <<
+		std::setw(w) << "B[+]" << std::setw(w) << "B[-]" <<
+		std::setw(w) << "C[+]" << std::setw(w) << "C[-]" << std::endl << std::endl;
+	for(int i = _min_n; i <= _max_n; ++i)
 	{
 		p_i = &sh_bc[i];
 		b = &(p_i -> b);
 		c = &(p_i -> c);
-		out << std::setw(10) << "iter" << std::setw( 5 ) << i << std::endl; 
-		out << std::setw(10) << "B[+]" << std::setw( w ) << std::setprecision( p ) << b -> p << std::endl;
-		out << std::setw(10) << "B[-]" << std::setw( w ) << std::setprecision( p ) << b -> m << std::endl;
-		out << std::setw(10) << "C[+]" << std::setw( w ) << std::setprecision( p ) << c -> p << std::endl;
-		out << std::setw(10) << "C[-]" << std::setw( w ) << std::setprecision( p ) << c -> m << std::endl;
-		out << std::endl;
+		out <<  std::setw(4) << i << 
+			std::setw( w ) << b -> p << std::setw( w ) << b -> m <<
+			std::setw( w ) << c -> p << std::setw( w ) << c -> m << std::endl;
 	}
+	out << std::endl;
+	out << std::setw(4) << "min" << " : " << std::setw(4) << this->_min_n << std::endl;
+	out << std::setw(4) << "max" << " : " << std::setw(4) << this->_max_n << std::endl;
+	out << std::endl;
 	out.unsetf( std::ios::scientific );
 }
 

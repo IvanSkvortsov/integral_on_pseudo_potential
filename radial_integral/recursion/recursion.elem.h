@@ -223,6 +223,10 @@ template<class T>
 void recursion_elem<T>::print(std::ostream & out)const
 {
 	int p = 30, w = p + 10, wf = 30;
+	std::string s = " recursion elem ";
+	int t_w = 10 + w + wf - s.size();
+	int w_ = t_w/2;
+	for(int i = 0; i < w_; ++i) out << '-'; out << s; for(int i = 0; i < t_w-w_; ++i) out << '-'; out << std::endl << std::endl;
 	out.setf(std::ios::scientific);
 	out << std::setw(10) << "alp" << std::setw( w ) << std::setprecision( p ) << alp << std::setw(wf) << "alp_i + alp_j + alp_k" << std::endl;
 	out << std::setw(10) << "alp2" << std::setw( w ) << std::setprecision( p ) << alp2 << std::setw(wf) << "2 * alp" << std::endl;

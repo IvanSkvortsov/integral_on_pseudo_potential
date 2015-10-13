@@ -15,32 +15,64 @@
 
 namespace hankel
 {
-	template<class float_type> float_type bessel(int i, int l);
+	template<class float_type> float_type coef  (int i, int l);
 	template<class float_type> float_type alpha (int i, int l);
 	template<class float_type> float_type beta  (int i, int l);
+	template<class float_type> float_type bessel(int l, float_type const & x);
+	template<class float_type> float_type bessel_e(int l, float_type const & x);
 };
 
 template<class T>
-T hankel::bessel(int i, int l)
+T hankel::bessel_e(int l, T const & x)
 {
-	int i1 = i - 1;
-	return Cnpk<T>(l, i1) / T(1<<i1);// (l+i-1)! / ((i-1)! * (l - (i-1))!) / (2^(i-1))
+	if( x == T(0) ) return 0;
+	T _2x = 2 * x;
+	T exp_2x = (l%2?-exp(-_2x): exp(-_2x));
+	T _i2x = T(1) / _2x, pow_i2x = _i2x;
+	T v = T(0);
+	for(int i = 0; i <= l; ++i)
+	{
+		v += Cnpk<T>(l,i) * ((i%2?-1:1) - exp_2x) * pow_i2x;
+		pow_i2x *= _i2x;
+	}
+	return v;
+}
+
+template<class T>
+T hankel::bessel(int l, T const & x)
+{
+	T v = T(0);
+	T sinh_x = sinh(x), cosh_x = cosh(x);
+	T _ix = T(1) / x, pow_ix = _ix;
+	for(int i = 0; i <= l; ++i)
+	{
+		v += (hankel::beta<T>(i,l) * sinh_x - hankel::alpha<T>(i,l) * cosh_x) * pow_ix;
+		pow_ix *= _ix;
+	}
+	return (l%2? -v : v);
+}
+
+template<class T>
+T hankel::coef(int i, int l)
+{
+	return Cnpk<T>(l, i) / T(uint32_t(1)<<i);// (l+i)! / (i! * (l - i)! * (2^i))
+	//return fact<T>(l + i) / (fact<T>(i) * fact<T>(l-i) * T(1<<i) );// (l+i)! / (i! * (l - i)! * (2^i))
 }
 
 template<class T>
 T hankel::alpha(int i, int l)
 {
-	if( (l - i) % 2 == 0 )
-		return hankel::bessel<T>(i, l);
+	if( (l + i) % 2 )
+		return hankel::coef<T>(i, l);
 	return 0;
 }
 
 template<class T>
 T hankel::beta(int i, int l)
 {
-	if( (l - i) % 2 == 0 )
+	if( (l + i) % 2 )
 		return 0;
-	return hankel::bessel<T>(i, l);
+	return hankel::coef<T>(i, l);
 }
 
 #ifdef  __aabb_values
